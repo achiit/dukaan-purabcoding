@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus.dev // Cyberpunk Engineering Terminal</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            cyberDark: '#070a10',
+            cyberCard: '#0f1422',
+            cyberBorder: '#1c2438',
+            cyberCyan: '#00f0ff',
+            cyberPurple: '#a855f7',
+            cyberNeonPink: '#ff007f',
+            cyberGreen: '#10b981',
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 20px rgba(0, 240, 255, 0.45)',
+            'neon-pink': '0 0 20px rgba(255, 0, 127, 0.45)',
+            'neon-purple': '0 0 20px rgba(168, 85, 247, 0.45)',
+            'terminal': '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.15)',
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'glow-scan': 'scan 4s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            },
+            scan: {
+              '0%': { backgroundPosition: '0% 0%' },
+              '100%': { backgroundPosition: '100% 100%' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom styling & Cyber Grid Effects */
+    body {
+      background-color: #070a10;
+      color: #e2e8f0;
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Ambient cyber grid overlay */
+    .cyber-grid {
+      background-size: 50px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    }
+
+    /* Custom Glassmorphism */
+    .glass-nav {
+      background: rgba(10, 13, 22, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+    }
+
+    .glass-card {
+      background: rgba(15, 20, 34, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(28, 36, 56, 0.9);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(0, 240, 255, 0.5);
+      box-shadow: 0 10px 30px -10px rgba(0, 240, 255, 0.25);
+      transform: translateY(-5px);
+    }
+
+    /* Subtle Scanline Effect */
+    .scanline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 40;
+      opacity: 0.35;
+    }
+
+    /* Terminal scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090c15;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
+    }
+
+    /* Glowing borders animation */
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(90deg, #00f0ff, #ff007f, #a855f7, #00f0ff);
+      background-size: 300% 300%;
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: scan 4s linear infinite;
+    }
+    .glow-border:hover::before {
+      opacity: 1;
+    }
+
+    /* 3D Perspective for Code Editor Mockup */
+    .tilt-box-wrap {
+      perspective: 1200px;
+    }
+    .tilt-box {
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
+    }
+  </style>
+</head>
+<body class="selection:bg-cyberCyan selection:text-black">
+
+  <!-- Scanline texture -->
+  <div class="scanline"></div>
+
+  <!-- Background Interactive Canvas (Matrix / Neon Cyber Nodes) -->
+  <canvas id="bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+  <!-- Ambient Light Orbs -->
+  <div class="fixed top-1/4 left-1/4 w-96 h-96 bg-cyberCyan/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-slow"></div>
+  <div class="fixed bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-cyberPurple/10 rounded-full blur-[120px] pointer-events-none -z-10 animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+
+  <!-- Top Glassmorphism Navigation Bar -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-lg bg-cyberDark border border-cyberCyan/50 flex items-center justify-center relative overflow-hidden group-hover:border-cyberCyan transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+          <i class="fa-solid fa-terminal text-cyberCyan group-hover:scale-110 transition-transform"></i>
+          <span class="absolute -bottom-1 w-full h-0.5 bg-gradient-to-r from-transparent via-cyberCyan to-transparent"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-mono font-bold tracking-wider text-lg text-white group-hover:text-cyberCyan transition-colors">
+            NEXUS<span class="text-cyberCyan">.IO</span>
+          </span>
+          <span class="text-[10px] font-mono tracking-widest text-slate-400">DEV_SYS_V3.8</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-8 font-mono text-sm tracking-wide">
+        <a href="#about" class="text-slate-300 hover:text-cyberCyan transition-colors flex items-center gap-1.5"><span class="text-cyberCyan/50">01.</span>//About</a>
+        <a href="#stack" class="text-slate-300 hover:text-cyberCyan transition-colors flex items-center gap-1.5"><span class="text-cyberCyan/50">02.</span>//Tech_Stack</a>
+        <a href="#terminal" class="text-slate-300 hover:text-cyberCyan transition-colors flex items-center gap-1.5"><span class="text-cyberCyan/50">03.</span>//CLI_Console</a>
+        <a href="#showcase" class="text-slate-300 hover:text-cyberCyan transition-colors flex items-center gap-1.5"><span class="text-cyberCyan/50">04.</span>//Projects</a>
+        <a href="#contact" class="text-slate-300 hover:text-cyberCyan transition-colors flex items-center gap-1.5"><span class="text-cyberCyan/50">05.</span>//Ping_Me</a>
+      </nav>
+
+      <!-- Status Indicator & Action CTA -->
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-cyberDark/90 border border-slate-800 text-xs font-mono">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyberGreen opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-cyberGreen"></span>
+          </span>
+          <span class="text-slate-300">SYS_STATUS:</span>
+          <span class="text-cyberGreen font-semibold">ONLINE</span>
+        </div>
+
+        <a href="#terminal" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyberCyan/10 text-cyberCyan border border-cyberCyan/40 text-xs font-mono font-medium hover:bg-cyberCyan hover:text-black transition-all hover:shadow-neon-cyan">
+          <i class="fa-solid fa-code-commit"></i>
+          <span>LAUNCH CLI</span>
+        </a>
+
+        <!-- Mobile Menu Hamburger -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-300 hover:text-cyberCyan focus:outline-none text-xl" aria-label="Toggle Navigation">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-cyberDark/95 border-b border-cyberBorder px-6 py-4 flex flex-col gap-3 font-mono text-sm">
+      <a href="#about" class="text-slate-300 hover:text-cyberCyan py-1">01. //About</a>
+      <a href="#stack" class="text-slate-300 hover:text-cyberCyan py-1">02. //Tech_Stack</a>
+      <a href="#terminal" class="text-slate-300 hover:text-cyberCyan py-1">03. //CLI_Console</a>
+      <a href="#showcase" class="text-slate-300 hover:text-cyberCyan py-1">04. //Projects</a>
+      <a href="#contact" class="text-slate-300 hover:text-cyberCyan py-1">05. //Contact</a>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-box" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="px-5 py-3 rounded-lg bg-cyberDark border border-cyberCyan text-cyberCyan font-mono text-sm shadow-neon-cyan flex items-center gap-3">
+      <i class="fa-solid fa-circle-check text-base"></i>
+      <span id="toast-msg">Action performed successfully!</span>
+    </div>
+  </div>
+
+  <main class="relative z-10 pt-28">
+
+    <!-- HERO SECTION -->
+    <section id="about" class="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Hero Content -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyberCyan/30 bg-cyberCyan/5 text-cyberCyan font-mono text-xs tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-cyberCyan animate-ping"></span>
+            INITIALIZING NEURAL PORTFOLIO PROTOCOL
+          </div>
+
+          <div class="space-y-2">
+            <h2 class="text-slate-400 font-mono text-lg tracking-wide">Hello World, I'm</h2>
+            <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
+              Kaelen <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyberCyan via-teal-300 to-cyberPurple">Vance</span>
+            </h1>
+            <div class="h-10 flex items-center">
+              <span class="text-slate-300 font-mono text-xl sm:text-2xl mr-2">&gt;</span>
+              <span id="typing-text" class="text-cyberCyan font-mono font-semibold text-xl sm:text-2xl border-r-2 border-cyberCyan pr-1 animate-pulse"></span>
+            </div>
+          </div>
+
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl font-normal">
+            Obsessed with crafting hyper-performant scalable systems, ultra-smooth visual aesthetics, and resilient architecture. Translating raw caffeine into low-latency algorithms and intuitive digital interfaces.
+          </p>
+
+          <!-- Status metrics -->
+          <div class="grid grid-cols-3 gap-3 py-2 max-w-md font-mono text-xs">
+            <div class="p-3 rounded-lg bg-cyberDark/80 border border-slate-800">
+              <div class="text-cyberCyan font-bold text-lg sm:text-xl">5+ YRS</div>
+              <div class="text-slate-400">EXP_BUILDING</div>
+            </div>
+            <div class="p-3 rounded-lg bg-cyberDark/80 border border-slate-800">
+              <div class="text-cyberNeonPink font-bold text-lg sm:text-xl">42+</div>
+              <div class="text-slate-400">REPOS_SHIPPED</div>
+            </div>
+            <div class="p-3 rounded-lg bg-cyberDark/80 border border-slate-800">
+              <div class="text-cyberGreen font-bold text-lg sm:text-xl">99.9%</div>
+              <div class="text-slate-400">UPTIME_INDEX</div>
+            </div>
+          </div>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <a href="#showcase" class="px-6 py-3.5 rounded-lg font-mono text-sm font-semibold text-black bg-cyberCyan hover:bg-white transition-all shadow-neon-cyan flex items-center gap-2">
+              <i class="fa-solid fa-rocket"></i>
+              <span>EXPLORE PROJECTS</span>
+            </a>
+            <a href="#terminal" class="px-6 py-3.5 rounded-lg font-mono text-sm font-semibold text-white bg-cyberCard border border-cyberBorder hover:border-cyberCyan transition-all flex items-center gap-2 hover:shadow-neon-cyan">
+              <i class="fa-solid fa-terminal text-cyberCyan"></i>
+              <span>COMMAND LINE</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right 3D Interactive Mockup Code Editor -->
+        <div class="lg:col-span-6 tilt-box-wrap flex justify-center">
+          <div id="editor-card" class="tilt-box w-full max-w-xl rounded-xl overflow-hidden bg-cyberCard/90 border border-cyberBorder shadow-terminal backdrop-blur-md">
+            
+            <!-- Editor Titlebar -->
+            <div class="px-4 py-3 bg-[#0d121d] border-b border-cyberBorder flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                <span class="ml-2 font-mono text-xs text-slate-400 flex items-center gap-1.5">
+                  <i class="fa-brands fa-square-js text-yellow-400"></i>
+                  engineerProfile.ts
+                </span>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs">
+                <button id="copy-code-btn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Copy Code">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Copy</span>
+                </button>
+                <button id="run-code-btn" class="px-3 py-1 rounded bg-cyberGreen/20 text-cyberGreen border border-cyberGreen/40 hover:bg-cyberGreen hover:text-black font-semibold transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-play text-[10px]"></i>
+                  <span>Run</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Code Body -->
+            <div class="p-4 sm:p-5 font-mono text-xs sm:text-sm overflow-x-auto text-slate-300 leading-relaxed max-h-96">
+              <table class="w-full">
+                <tbody>
+                  <tr><td class="select-none text-slate-600 text-right pr-4 w-6">01</td><td><span class="text-cyberPurple">import</span> { Architect, Innovator } <span class="text-cyberPurple">from</span> <span class="text-emerald-400">'@nexus/core'</span>;</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">02</td><td>&nbsp;</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">03</td><td><span class="text-cyberPurple">const</span> <span class="text-yellow-300">kaelen</span>: Architect = {</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">04</td><td>&nbsp;&nbsp;codename: <span class="text-emerald-400">'CyberVance'</span>,</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">05</td><td>&nbsp;&nbsp;focus: [<span class="text-emerald-400">'FullStack'</span>, <span class="text-emerald-400">'DistributedSystems'</span>, <span class="text-emerald-400">'GenAI'</span>],</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">06</td><td>&nbsp;&nbsp;status: <span class="text-emerald-400">'Active & Ready for Challenges'</span>,</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">07</td><td>&nbsp;&nbsp;caffeineLevel: <span class="text-orange-400">99.4</span>,</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">08</td><td>&nbsp;&nbsp;synthesize(): <span class="text-cyberCyan">string</span> {</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">09</td><td>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyberPurple">return</span> <span class="text-emerald-400">`🚀 Building high-scale web platforms with flawless UX.`</span>;</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">10</td><td>&nbsp;&nbsp;}</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">11</td><td>};</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">12</td><td>&nbsp;</td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">13</td><td><span class="text-slate-500">// Trigger execution</span></td></tr>
+                  <tr><td class="select-none text-slate-600 text-right pr-4">14</td><td>console.<span class="text-blue-400">log</span>(kaelen.<span class="text-yellow-300">synthesize</span>());</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mini Console Output Box -->
+            <div class="border-t border-cyberBorder bg-[#080b12] p-3 font-mono text-xs">
+              <div class="flex items-center justify-between text-slate-500 pb-1.5 border-b border-slate-900">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-terminal text-[11px] text-cyberCyan"></i>
+                  <span>Embedded Output Terminal</span>
+                </span>
+                <span class="text-[10px] text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                  READY
+                </span>
+              </div>
+              <div id="code-console" class="mt-2 text-cyberCyan whitespace-pre-wrap leading-relaxed">
+[System]: Click 'Run' above to execute TypeScript buffer...
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TECH STACK ORBIT & MATRIX GRID -->
+    <section id="stack" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-900 bg-cyberDark/60">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center space-y-4 mb-16">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyberPurple/40 bg-cyberPurple/10 text-cyberPurple font-mono text-xs">
+            CORE_ARSENAL.JSON
+          </div>
+          <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            Powered by Modern <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyberCyan to-cyberPurple">Technologies</span>
+          </h2>
+          <p class="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base">
+            Engineered with a versatile toolkit spanning bleeding-edge frontends, distributed backends, container orchestration, and rapid AI tooling.
+          </p>
+        </div>
+
+        <!-- Tech Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+          
+          <!-- Card 1 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-js text-3xl text-yellow-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-400/10 text-yellow-300 border border-yellow-400/20">V8_ENGINE</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">JavaScript / TS</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Modern ES6+, TypeScript strict typings, asynchronous streams.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-yellow-400 h-full rounded-full transition-all duration-1000 w-[95%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-react text-3xl text-cyberCyan group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyberCyan/10 text-cyberCyan border border-cyberCyan/20">SSR / RSC</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">React & Next.js</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Server Components, dynamic islands, Tailwind orchestration.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-cyberCyan h-full rounded-full transition-all duration-1000 w-[92%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-node text-3xl text-emerald-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-400/10 text-emerald-300 border border-emerald-400/20">ASYNC_IO</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">Node.js / Express</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Microservices, high-throughput REST APIs, WebSockets.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-emerald-400 h-full rounded-full transition-all duration-1000 w-[88%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-python text-3xl text-blue-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-400/10 text-blue-300 border border-blue-400/20">AI / DATA</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">Python & AI</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">FastAPI, PyTorch basics, LangChain agent integration.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-blue-400 h-full rounded-full transition-all duration-1000 w-[85%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-docker text-3xl text-sky-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-400/10 text-sky-300 border border-sky-400/20">DEVOPS</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">Docker & K8s</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Containerization, automated CI/CD pipelines, multi-stage builds.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-sky-400 h-full rounded-full transition-all duration-1000 w-[80%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-rust text-3xl text-orange-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-400/10 text-orange-300 border border-orange-400/20">MEM_SAFE</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">Rust & WASM</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Zero-cost abstractions, memory security, native speeds.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-orange-400 h-full rounded-full transition-all duration-1000 w-[74%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-solid fa-database text-3xl text-pink-500 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-pink-500/10 text-pink-300 border border-pink-500/20">SQL & NoSQL</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">PostgreSQL / Redis</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">ACID guarantees, caching architectures, complex aggregations.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-pink-500 h-full rounded-full transition-all duration-1000 w-[86%]"></div>
+            </div>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="glass-card p-5 rounded-xl group relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <i class="fa-brands fa-git-alt text-3xl text-red-400 group-hover:scale-110 transition-transform"></i>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-400/10 text-red-300 border border-red-400/20">VERSION_CTRL</span>
+            </div>
+            <h3 class="font-bold text-white text-lg">Git & Linux Ops</h3>
+            <p class="text-xs text-slate-400 mt-1 font-mono">Bash scripting, ssh tunnels, production cluster debugging.</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-red-400 h-full rounded-full transition-all duration-1000 w-[90%]"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE INTERACTIVE TERMINAL / COMMAND CENTER -->
+    <section id="terminal" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-900 relative">
+      <div class="max-w-4xl mx-auto">
+        
+        <div class="text-center space-y-3 mb-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyberCyan/40 bg-cyberCyan/10 text-cyberCyan font-mono text-xs">
+            INTERACTIVE SHELL v2.4
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Developer Command Center
+          </h2>
+          <p class="text-slate-400 font-mono text-xs sm:text-sm">
+            Type <span class="text-cyberCyan underline">help</span> to list available commands or click quick chips below.
+          </p>
+        </div>
+
+        <!-- Terminal Shell Card -->
+        <div class="rounded-xl overflow-hidden bg-[#070b14] border border-cyberCyan/40 shadow-terminal">
+          
+          <!-- Terminal top bar -->
+          <div class="px-4 py-3 bg-[#0d1322] border-b border-cyberBorder flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+              <span class="ml-2 font-mono text-xs text-slate-400">kaelen@nexus-core: ~ (zsh)</span>
+            </div>
+            <div class="flex items-center gap-2 font-mono text-xs text-slate-400">
+              <button onclick="terminalClear()" class="hover:text-cyberCyan px-2 py-0.5 rounded bg-slate-800 transition">clear</button>
+            </div>
+          </div>
+
+          <!-- Terminal output scroll area -->
+          <div id="terminal-screen" class="p-4 sm:p-6 font-mono text-xs sm:text-sm h-80 sm:h-96 overflow-y-auto space-y-3 text-slate-200">
+            <div class="text-slate-400 leading-relaxed">
+              <span class="text-cyberCyan font-bold">Nexus DevShell [Version 3.4.120]</span><br>
+              (c) 2026 Nexus Cybernetics Corporation. All rights reserved.<br>
+              Type <span class="text-cyberGreen font-semibold">'help'</span> for supported commands list.
+            </div>
+          </div>
+
+          <!-- Input prompt -->
+          <div class="px-4 sm:px-6 py-3 bg-[#0a0f1c] border-t border-cyberBorder flex items-center gap-2">
+            <span class="text-cyberGreen font-mono font-bold text-sm sm:text-base">nexus@root:~$</span>
+            <input 
+              id="terminal-input" 
+              type="text" 
+              class="flex-1 bg-transparent border-none outline-none font-mono text-sm text-cyberCyan focus:ring-0 placeholder-slate-600" 
+              placeholder="Type command here (e.g. 'help', 'skills', 'sudo hire_me')..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="terminal-enter-btn" class="px-3 py-1 rounded bg-cyberCyan/20 text-cyberCyan text-xs font-mono border border-cyberCyan/40 hover:bg-cyberCyan hover:text-black transition">
+              ENTER
+            </button>
+          </div>
+
+          <!-- Quick command chips for mobile & convenience -->
+          <div class="p-3 bg-[#060910] border-t border-slate-900 flex flex-wrap items-center gap-2 text-xs font-mono">
+            <span class="text-slate-500 mr-1">Quick actions:</span>
+            <button onclick="runCommand('help')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-cyberCyan hover:border-cyberCyan/40 border border-slate-700 transition">help</button>
+            <button onclick="runCommand('skills')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-cyberCyan hover:border-cyberCyan/40 border border-slate-700 transition">skills</button>
+            <button onclick="runCommand('projects')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-cyberCyan hover:border-cyberCyan/40 border border-slate-700 transition">projects</button>
+            <button onclick="runCommand('matrix')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 hover:text-cyberGreen hover:border-cyberGreen/40 border border-slate-700 transition">matrix</button>
+            <button onclick="runCommand('sudo hire_me')" class="px-2.5 py-1 rounded-full bg-cyberNeonPink/10 text-cyberNeonPink hover:bg-cyberNeonPink hover:text-black border border-cyberNeonPink/30 transition">sudo hire_me</button>
+            <button onclick="runCommand('clear')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition">clear</button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PROJECT SHOWCASE CARDS -->
+    <section id="showcase" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-900 bg-cyberDark/80">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyberNeonPink/40 bg-cyberNeonPink/10 text-cyberNeonPink font-mono text-xs">
+              DEPLOYED_SYSTEMS.EXP
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-3">
+              Featured <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyberNeonPink via-purple-400 to-cyberCyan">Creations</span>
+            </h2>
+          </div>
+          <p class="text-slate-400 font-mono text-xs sm:text-sm max-w-md">
+            Production grade systems, high-concurrency microservices, and interactive web laboratories.
+          </p>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          
+          <!-- Project 1 -->
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col group">
+            <div class="h-48 bg-gradient-to-br from-cyan-950/60 to-slate-900 flex items-center justify-center relative overflow-hidden border-b border-cyberBorder">
+              <div class="absolute inset-0 cyber-grid opacity-40"></div>
+              <i class="fa-solid fa-network-wired text-5xl text-cyberCyan group-hover:scale-125 transition-transform duration-500"></i>
+              <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-black/60 border border-cyberCyan/40 text-[10px] font-mono text-cyberCyan">
+                DISTRIBUTED
+              </div>
+            </div>
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono text-slate-400 mb-2">
+                  <span>Next.js 14</span> • <span>Golang</span> • <span>Kafka</span>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-cyberCyan transition-colors">
+                  AetherStream: Event Broker
+                </h3>
+                <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                  Real-time distributed streaming pipeline supporting up to 120,000 ingest messages per second with fault-tolerant persistent replay.
+                </p>
+              </div>
+              <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-800/80 font-mono text-xs">
+                <a href="#terminal" onclick="runCommand('projects')" class="text-cyberCyan hover:underline flex items-center gap-1.5">
+                  <i class="fa-solid fa-code"></i> Spec Review
+                </a>
+                <button onclick="triggerToast('Redirecting to project repository...')" class="text-slate-300 hover:text-white flex items-center gap-1.5 hover:underline">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project 2 -->
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col group">
+            <div class="h-48 bg-gradient-to-br from-purple-950/60 to-slate-900 flex items-center justify-center relative overflow-hidden border-b border-cyberBorder">
+              <div class="absolute inset-0 cyber-grid opacity-40"></div>
+              <i class="fa-solid fa-brain text-5xl text-cyberPurple group-hover:scale-125 transition-transform duration-500"></i>
+              <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-black/60 border border-cyberPurple/40 text-[10px] font-mono text-cyberPurple">
+                AI / RAG
+              </div>
+            </div>
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono text-slate-400 mb-2">
+                  <span>FastAPI</span> • <span>VectorDB</span> • <span>React</span>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-cyberPurple transition-colors">
+                  CogniSynth AI Copilot
+                </h3>
+                <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                  Contextual knowledge assistant with semantic retrieval augmented generation (RAG) over engineering documentation and codebase repos.
+                </p>
+              </div>
+              <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-800/80 font-mono text-xs">
+                <a href="#terminal" onclick="runCommand('projects')" class="text-cyberPurple hover:underline flex items-center gap-1.5">
+                  <i class="fa-solid fa-code"></i> Spec Review
+                </a>
+                <button onclick="triggerToast('Vector retrieval engine initialized!')" class="text-slate-300 hover:text-white flex items-center gap-1.5 hover:underline">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project 3 -->
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col group">
+            <div class="h-48 bg-gradient-to-br from-pink-950/60 to-slate-900 flex items-center justify-center relative overflow-hidden border-b border-cyberBorder">
+              <div class="absolute inset-0 cyber-grid opacity-40"></div>
+              <i class="fa-solid fa-shield-halved text-5xl text-cyberNeonPink group-hover:scale-125 transition-transform duration-500"></i>
+              <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-black/60 border border-cyberNeonPink/40 text-[10px] font-mono text-cyberNeonPink">
+                SECURITY
+              </div>
+            </div>
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono text-slate-400 mb-2">
+                  <span>Rust</span> • <span>WebAssembly</span> • <span>eBPF</span>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-cyberNeonPink transition-colors">
+                  ZeroGuard Sentinel
+                </h3>
+                <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                  Ultra-lightweight host telemetry monitor for container clusters, providing real-time anomaly isolation with zero measurable CPU latency.
+                </p>
+              </div>
+              <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-800/80 font-mono text-xs">
+                <a href="#terminal" onclick="runCommand('projects')" class="text-cyberNeonPink hover:underline flex items-center gap-1.5">
+                  <i class="fa-solid fa-code"></i> Spec Review
+                </a>
+                <button onclick="triggerToast('Sandbox runtime security active.')" class="text-slate-300 hover:text-white flex items-center gap-1.5 hover:underline">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / TRANSMISSION SECTION -->
+    <section id="contact" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-900">
+      <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 sm:p-12 relative overflow-hidden">
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-cyberCyan/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="text-center space-y-4 mb-8">
+          <span class="text-xs font-mono text-cyberCyan px-3 py-1 rounded-full border border-cyberCyan/30 bg-cyberCyan/5">
+            READY_FOR_ENGAGEMENT
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+            Initiate Direct Transmission
+          </h2>
+          <p class="text-slate-400 text-sm max-w-lg mx-auto font-mono">
+            Have a project, role, or architecture problem to discuss? Send a signal over encrypted socket.
+          </p>
+        </div>
+
+        <form id="contact-form" class="space-y-4 max-w-xl mx-auto font-mono text-xs sm:text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">CALLSIGN / NAME</label>
+              <input type="text" required placeholder="Major Kusanagi" class="w-full px-4 py-3 rounded-lg bg-cyberDark border border-cyberBorder text-white focus:outline-none focus:border-cyberCyan transition" />
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">FREQ / EMAIL</label>
+              <input type="email" required placeholder="kaelen@nexus.io" class="w-full px-4 py-3 rounded-lg bg-cyberDark border border-cyberBorder text-white focus:outline-none focus:border-cyberCyan transition" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">TRANSMISSION PAYLOAD</label>
+            <textarea rows="4" required placeholder="Let's build something revolutionary together..." class="w-full px-4 py-3 rounded-lg bg-cyberDark border border-cyberBorder text-white focus:outline-none focus:border-cyberCyan transition resize-none"></textarea>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-lg bg-gradient-to-r from-cyberCyan to-teal-400 text-black font-bold text-sm tracking-wider uppercase hover:opacity-90 transition-all shadow-neon-cyan flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>TRANSMIT DISPATCH</span>
+          </button>
+        </form>
+
+        <!-- Social links -->
+        <div class="flex items-center justify-center gap-6 mt-10 pt-6 border-t border-slate-800 text-slate-400 text-xl">
+          <a href="#" onclick="triggerToast('Opening GitHub profile...')" class="hover:text-cyberCyan transition-colors" title="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="#" onclick="triggerToast('Opening LinkedIn profile...')" class="hover:text-cyberCyan transition-colors" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="#" onclick="triggerToast('Opening X / Twitter...')" class="hover:text-cyberCyan transition-colors" title="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" onclick="triggerToast('Connecting to Discord handle...')" class="hover:text-cyberCyan transition-colors" title="Discord"><i class="fa-brands fa-discord"></i></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-900 bg-[#04060a] py-8 text-center text-xs font-mono text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        NEXUS_CORE // KAELEN VANCE &copy; 2026. BUILT WITH HYPERMEDIA STANDARDS.
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span class="text-cyberCyan">&lt;/&gt;</span>
+        <span>LATENCY: 12ms</span>
+        <span>•</span>
+        <span>ENCRYPTED: TLS_1.3</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC (Interactive Background, Terminal, Tilt 3D, Typing Effect) -->
+  <script>
+    // 1. Toast Notification Helper
+    function triggerToast(message) {
+      const toast = document.getElementById('toast-box');
+      const msg = document.getElementById('toast-msg');
+      if (!toast || !msg) return;
+      msg.innerText = message;
+      toast.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+      }, 3200);
+    }
+
+    // 2. Mobile Menu Toggle
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileBtn && mobileMenu) {
+      mobileBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+      // Close mobile menu on link click
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+    }
+
+    // 3. Dynamic Typing Effect for Hero Title
+    const titles = [
+      "Full-Stack Systems Architect",
+      "Creative WebGL & UI Developer",
+      "Low-Latency Optimization Specialist",
+      "AI / LLM Integration Engineer",
+      "Bug Hunter & Security Enthusiast"
+    ];
+    let titleIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    const typingElement = document.getElementById('typing-text');
+
+    function typeLoop() {
+      if (!typingElement) return;
+      const currentTitle = titles[titleIndex];
+
+      if (isDeleting) {
+        typingElement.textContent = currentTitle.substring(0, charIndex - 1);
+        charIndex--;
+      } else {
+        typingElement.textContent = currentTitle.substring(0, charIndex + 1);
+        charIndex++;
+      }
+
+      let speed = isDeleting ? 40 : 85;
+
+      if (!isDeleting && charIndex === currentTitle.length) {
+        speed = 1800; // Pause at end of word
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        titleIndex = (titleIndex + 1) % titles.length;
+        speed = 400; // Pause before typing new word
+      }
+
+      setTimeout(typeLoop, speed);
+    }
+    typeLoop();
+
+    // 4. 3D Tilt Effect on Editor Window
+    const tiltCard = document.getElementById('editor-card');
+    if (tiltCard) {
+      const container = tiltCard.parentElement;
+      container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = (-y / rect.height) * 16;
+        const rotateY = (x / rect.width) * 16;
+        tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      container.addEventListener('mouseleave', () => {
+        tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      });
+    }
+
+    // 5. Code Editor Actions (Run & Copy)
+    const runBtn = document.getElementById('run-code-btn');
+    const copyBtn = document.getElementById('copy-code-btn');
+    const codeConsole = document.getElementById('code-console');
+
+    if (runBtn && codeConsole) {
+      runBtn.addEventListener('click', () => {
+        codeConsole.innerHTML = `
+<span class="text-yellow-400">[Executing]:</span> ts-node --target es2024 engineerProfile.ts
+<span class="text-cyberGreen">[Output]:</span> 🚀 Building high-scale web platforms with flawless UX.
+<span class="text-slate-400">[Stats]:</span> Execution completed in 4.2ms with memory: 18.2MB.
+        `.trim();
+        triggerToast("Compiled & Executed engineerProfile.ts!");
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const codeText = `const kaelen = {
+  codename: 'CyberVance',
+  focus: ['FullStack', 'DistributedSystems', 'GenAI'],
+  status: 'Active & Ready for Challenges',
+  caffeineLevel: 99.4,
+  synthesize() {
+    return '🚀 Building high-scale web platforms with flawless UX.';
+  }
+};
+console.log(kaelen.synthesize());`;
+        
+        // Use copy command for iframe compatibility
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = codeText;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        try {
+          document.execCommand('copy');
+          triggerToast('Code snippet copied to clipboard!');
+        } catch (err) {
+          triggerToast('Failed to copy code.');
+        }
+        document.body.removeChild(tempTextarea);
+      });
+    }
+
+    // 6. Interactive CLI Terminal Implementation
+    const terminalScreen = document.getElementById('terminal-screen');
+    const terminalInput = document.getElementById('terminal-input');
+    const terminalEnterBtn = document.getElementById('terminal-enter-btn');
+
+    const terminalCommands = {
+      help: () => `
+<div class="text-cyberCyan font-bold">AVAILABLE COMMANDS:</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1 text-slate-300">
+  <div><span class="text-cyberGreen">help</span> - list commands</div>
+  <div><span class="text-cyberGreen">skills</span> - view tech proficiencies</div>
+  <div><span class="text-cyberGreen">projects</span> - browse systems portfolio</div>
+  <div><span class="text-cyberGreen">about</span> - developer background</div>
+  <div><span class="text-cyberGreen">matrix</span> - toggle binary rain density</div>
+  <div><span class="text-cyberGreen">sudo hire_me</span> - dispatch hire notification</div>
+  <div><span class="text-cyberGreen">clear</span> - wipe current screen</div>
+  <div><span class="text-cyberGreen">contact</span> - transmit direct transmission</div>
+</div>`,
+      
+      about: () => `
+<div>
+  <span class="text-cyberCyan font-bold">Kaelen Vance</span> // Full-Stack Systems Engineer<br>
+  Based in cyberspace. Passionate about high-load microservices, responsive web aesthetics, 
+  and developer developer ergonomics. 
+</div>`,
+
+      skills: () => `
+<div class="text-slate-300 space-y-1">
+  <div>⚡ <strong class="text-cyberCyan">Languages:</strong> TypeScript, JavaScript, Python, Rust, Go, SQL, HTML/CSS</div>
+  <div>🛠️ <strong class="text-cyberCyan">Frameworks:</strong> Next.js, React, Node.js, FastAPI, Tailwind CSS, Express</div>
+  <div>☁️ <strong class="text-cyberCyan">Infra & DevOps:</strong> Docker, Kubernetes, AWS, Redis, PostgreSQL, GitHub Actions</div>
+  <div>🧠 <strong class="text-cyberCyan">AI Tools:</strong> LangChain, Vector Embeddings, Ollama, Claude/OpenAI APIs</div>
+</div>`,
+
+      projects: () => `
+<div class="text-slate-300 space-y-1">
+  <div>1. <span class="text-cyberCyan font-bold">AetherStream</span> - Distributed 120k msg/sec event broker with Kafka.</div>
+  <div>2. <span class="text-cyberPurple font-bold">CogniSynth</span> - RAG architecture copilot for complex technical schemas.</div>
+  <div>3. <span class="text-cyberNeonPink font-bold">ZeroGuard</span> - Rust-powered container runtime security monitor.</div>
+</div>`,
+
+      'sudo hire_me': () => {
+        triggerToast("🚀 Offer signal received! Contact opened.");
+        return `<span class="text-cyberNeonPink font-bold">[ACCESS GRANTED]:</span> Thank you for your interest! Please proceed to the transmission console or reach out at <span class="text-cyberCyan">kaelen@nexus.io</span>.`;
+      },
+
+      matrix: () => {
+        toggleMatrixMode();
+        return `<span class="text-emerald-400">[MATRIX CYBER-OVERRIDE TRIGGERED]</span> Binary rain parameters altered.`;
+      },
+
+      contact: () => {
+        const c = document.getElementById('contact');
+        if (c) c.scrollIntoView({ behavior: 'smooth' });
+        return `<span class="text-cyberCyan">Scrolling to secure transmission form...</span>`;
+      },
+
+      clear: () => {
+        terminalClear();
+        return null;
+      }
+    };
+
+    function terminalClear() {
+      if (!terminalScreen) return;
+      terminalScreen.innerHTML = `
+      <div class="text-slate-400 leading-relaxed">
+        <span class="text-cyberCyan font-bold">Nexus DevShell [Cleaned]</span><br>
+        Type <span class="text-cyberGreen font-semibold">'help'</span> for supported commands list.
+      </div>`;
+    }
+
+    function runCommand(cmdString) {
+      if (!terminalScreen) return;
+      const cleanCmd = cmdString.trim().toLowerCase();
+      
+      // Echo input line
+      const inputEcho = document.createElement('div');
+      inputEcho.innerHTML = `<span class="text-cyberGreen font-bold">nexus@root:~$</span> <span class="text-white">${cmdString}</span>`;
+      terminalScreen.appendChild(inputEcho);
+
+      // Evaluate
+      const outputElem = document.createElement('div');
+      outputElem.className = 'text-slate-300';
+
+      if (terminalCommands[cleanCmd]) {
+        const result = terminalCommands[cleanCmd]();
+        if (result !== null) {
+          outputElem.innerHTML = result;
+          terminalScreen.appendChild(outputElem);
+        }
+      } else if (cleanCmd === '') {
+        // do nothing
+      } else {
+        outputElem.innerHTML = `<span class="text-red-400">nexus: command not found: ${cleanCmd}.</span> Type <span class="text-cyberCyan">'help'</span> for list of commands.`;
+        terminalScreen.appendChild(outputElem);
+      }
+
+      // Auto scroll to bottom
+      terminalScreen.scrollTop = terminalScreen.scrollHeight;
+    }
+
+    if (terminalInput) {
+      terminalInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const val = terminalInput.value;
+          runCommand(val);
+          terminalInput.value = '';
+        }
+      });
+    }
+
+    if (terminalEnterBtn && terminalInput) {
+      terminalEnterBtn.addEventListener('click', () => {
+        runCommand(terminalInput.value);
+        terminalInput.value = '';
+      });
+    }
+
+    // 7. Contact Form submission handler
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+      contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        triggerToast("Transmission dispatched across encrypted socket!");
+        contactForm.reset();
+      });
+    }
+
+    // 8. Cyberpunk Animated Background Canvas (Matrix Rain + Ambient Particle Network)
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    let matrixMode = false;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function toggleMatrixMode() {
+      matrixMode = !matrixMode;
+    }
+
+    // Floating particles network
+    const particleCount = 45;
+    const particles = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        radius: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#00f0ff' : '#a855f7'
+      });
+    }
+
+    // Matrix Rain drops
+    const fontSize = 14;
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
+    const chars = '01ABCDEF0123456789<>{}/*~_+-=$#';
+
+    function renderCanvas() {
+      if (matrixMode) {
+        // High intensity Matrix Rain
+        ctx.fillStyle = 'rgba(7, 10, 16, 0.2)';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = '#00f0ff';
+        ctx.font = `${fontSize}px 'Fira Code', monospace`;
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars.charAt(Math.floor(Math.random() * chars.length));
+          const x = i * fontSize;
+          const y = drops[i] * fontSize;
+
+          // Glowing head of the stream
+          if (Math.random() > 0.9) {
+            ctx.fillStyle = '#ffffff';
+          } else {
+            ctx.fillStyle = '#10b981';
+          }
+          ctx.fillText(text, x, y);
+
+          if (y > height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      } else {
+        // Subtle ambient network
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 130) {
+              ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 130)})`;
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw and update nodes
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+
+          ctx.fillStyle = p.color;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      requestAnimationFrame(renderCanvas);
+    }
+
+    // Start background canvas
+    window.onload = function() {
+      resizeCanvas();
+      renderCanvas();
+    };
+  </script>
+</body>
+</html>
